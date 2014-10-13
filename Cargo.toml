@@ -1,5 +1,5 @@
 [package]
 
-name = "lpeg"
+name = "marge"
 version = "0.0.1"
 authors = ["Kevin Kelley <kevin@kelleysoft.com>"]

@@ -19,11 +19,20 @@ pub use parse::Error;
 //pub use std::collections::HashMap;
 
 mod capture;
-mod tree;
-mod compile;
+mod ast;
 mod parse;
+mod compile;
 mod peg;
 mod vm;
+
+// parse a string to an AST
+// compile the AST to a Program
+// recognize the Program against an input string, (true or false)
+// match the Program against an input, (vec<Capture>)
+// run the Program with an input, an environemt of functions, and a state-stack,
+//     producing side effects and a final top-of-stack value.
+
+
 
 // pattern <- grammar / simplepatt
 // grammar <- (nonterminal ’<-’ sp simplepatt)+
