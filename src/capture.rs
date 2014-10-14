@@ -9,7 +9,7 @@ pub enum CapKind {
 pub struct Capture {
   s: *const char,  /* subject position */
   idx: u16,  /* extra info about capture (group name, arg index, etc.) */
-  kind: u8,  /* kind of capture */
+  kind: CapKind,  /* kind of capture */
   siz: u8,  /* size of full capture + 1 (0 = not a full capture) */
 }
 

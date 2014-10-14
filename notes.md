@@ -53,15 +53,15 @@ Figure 2. basic instructions for the parsing machine:
 
 	p, i, e, c 		Char x, S[i] = x 	⇒ p + 1, i + 1, e, c
 	p, i, e, c 		Char x, S[i] 6= x 	⇒ Fail, i, e, c
-	p, i, e, c 		Jump l 			⇒ p + l, i, e, c
-	p, i, e, c 		Choice l 		⇒ p + 1, i, (p + l, i, c) : e, c
-	p, i, e, ci 		Call l 			⇒ p + l, i, (p + 1) : e, c
-	p0, i, p1 : e, c 	Return 			⇒ p1, i, e, c
-	p, i, h : e, c 		Commit l 		⇒ p + l, i, e, c
-	p, i, e, c 		Capture k 		⇒ p + 1, i, e, (i, p) : c
-	p, i, e, c 		Fail 			⇒ Fail, i, e, c
-	Fail, i, p : e, c 	any 			⇒ Fail, i, e, c
-	Fail,i0, (p,i1,c1):e,c0	any 			⇒ p, i1, e, c1
+	p, i, e, c 		Jump l 				⇒ p + l, i, e, c
+	p, i, e, c 		Choice l 			⇒ p + 1, i, (p + l, i, c) : e, c
+	p, i, e, ci 	Call l 				⇒ p + l, i, (p + 1) : e, c
+	p0, i, p1:e c 	Return 				⇒ p1, i, e, c
+	p, i, h:e, c 	Commit l 			⇒ p + l, i, e, c
+	p, i, e, c 		Capture k 			⇒ p + 1, i, e, (i, p) : c
+	p, i, e, c 		Fail 				⇒ Fail, i, e, c
+	Fail, i, p:e, c any 				⇒ Fail, i, e, c
+	Fail,i0, (p,i1,c1):e,c0	any 		⇒ p, i1, e, c1
 
 
 Figure 3. extra instructions for the parsing machine:

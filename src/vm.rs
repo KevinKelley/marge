@@ -1,10 +1,117 @@
 
-use capture::Capture;
+//use capture::Capture;
+
+struct CodeIdx(uint);
+struct CharNum(uint);
+struct Capture(CharNum, CodeIdx);
+struct CapIdx(uint);
+
+enum StackEntry {
+  ReturnTo(Option<CodeIdx>),
+  AlternateTo(CodeIdx, CharNum, CapIdx)
+}
+struct State {
+  // current instruction index, or FAIL (-1 or None)
+  p: Option<CodeIdx>,
+  // current subject position (char index in subject string) (NOT byte index)
+  i: CharNum,
+  // stack-entry: either (uint) return-pos, or (next-pos, subject-pos, cap-list)
+  e: StackEntry,
+  // Capture pointer?
+  c: CapIdx
+}
+struct VmState(
+  // current instruction index, or FAIL (-1 or None)
+  Option<CodeIdx>,
+  // current subject position (char index in subject string) (NOT byte index)
+  CharNum,
+  // stack-entry: either (uint) return-pos, or (next-pos, subject-pos, cap-list)
+  StackEntry,
+  // Capture pointer?
+  CapIdx
+);
+
+struct Vm {
+  program: Vec<Opcode>,
+  text: Vec<char>,
+  stack: Vec<State>,
+  captures: Vec<Capture>
+}
+#[allow(unused_mut)]
+impl Vm {
+  fn new(program: Vec<Opcode>, text: Vec<char>) -> Vm {
+    Vm {
+      program: program,
+      text: text,
+      stack: vec!(),
+      captures: vec!()
+    }
+  }
+
+  //Figure 2. basic instructions for the parsing machine:
+  //
+  //  p,i,e,c       Char x,S[i] = x   ⇒ p+1,i+1,e,c
+  //  p,i,e,c       Char x,S[i] 6= x  ⇒ Fail,i,e,c
+  //  p,i,e,c       Jump l            ⇒ p+l,i,e,c
+  //  p,i,e,c       Choice l          ⇒ p+1,i,(p+l,i,c):e,c
+  //  p,i,e,ci      Call l            ⇒ p+l,i,(p+1):e,c
+  //  p0,i,p1:e c   Return            ⇒ p1,i,e,c
+  //  p,i,h:e,c     Commit l          ⇒ p+l,i,e,c
+  //  p,i,e,c       Capture k         ⇒ p+1,i,e,(i,p) : c
+  //  p,i,e,c       Fail              ⇒ Fail,i,e,c
+  //  Fail,i,p:e,c  any               ⇒ Fail,i,e,c
+  //  Fail,i0,(p,i1,c1):e,c0 any      ⇒ p,i1,e,c1
+
+  fn step(&self, VmState(p,i,e,c): VmState) -> VmState {
+    match (p,i,e,c) {
+      (None,_,_,_) => VmState(None,i,e,c), // infinite halt-loop
+      (Some(CodeIdx(pc)),CharNum(i),e,c) => {
+        let op = self.program[pc];
+        match op {
+          IChar(x) if x == self.text[i] => VmState(Some(CodeIdx(pc+1)),CharNum(i+1),e,c),
+          IChar(x) if x != self.text[i] => VmState(None,CharNum(i),e,c),
+          _ => VmState(p,CharNum(i),e,c)
+        }
+      }
+    }
+//    let op = self.program[p];
+//    match op {
+//      Some(IAny) => { VmState(p,i,e,c) }
+//      _ => { VmState(p,i,e,c) }
+//    }
+  }
+  /// match a string input, and return number of characters (not bytes) matched.
+  /// should this be non-self method that creates an internal private Vm to run?
+  fn do_match(&mut self, input: &str) -> Option<CharNum> {
+
+    let (mut p,mut i,mut e,mut c) = (
+      Some(CodeIdx(0)), // start at the beginning of code
+      CharNum(0),       // and beginning of source
+      ReturnTo(None),   // nowhere to return to when leaving
+      CapIdx(0)         // no captures yet
+    );
+    'vm: loop {
+      let (p,i,e,c) = match p {
+        None => break 'vm,
+        Some(CodeIdx(pc)) => {
+          let op = self.program[pc];
+          match op {
+            IAny => { (p,i,e,c) }
+            IChar(x) => { (p,i,e,c) }
+            //...
+            _ => { (p,i,e,c) }
+          }
+        }
+      };
+    };
+    None
+  }
+}
 
 /* Virtual Machine's instructions */
 enum Opcode {
   IAny,             // if no char, fail
-  IChar,            // if char != aux, fail
+  IChar(char),      // if char != aux, fail
   ISet,             // if char not in buff, fail
   ITestAny,         // in no char, jump to 'offset'
   ITestChar,        // if char != aux, jump to 'offset'
@@ -28,8 +135,6 @@ enum Opcode {
   ICloseCapture,
   ICloseRunTime
 }
-
-
 
 //typedef union Instruction {
 //  struct Inst {
@@ -92,9 +197,9 @@ struct Stack<'a> {
 //                   Instruction *op, Capture *capture, int ptop)
 unsafe fn do_match (
 	//lua_State *L,
-	o: *const char,
-	s: *const char,
-	e: *const char,
+	o: *const char,  // origin i think
+	s: *const char,  // start, ptr to curr char
+	e: *const char,  // end, ptr to EOI
 	op: *const Instruction,
 	capture: *const Capture,
 	ptop: int

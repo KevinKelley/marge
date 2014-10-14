@@ -18,10 +18,10 @@ extern crate unicode;
 pub use parse::Error;
 //pub use std::collections::HashMap;
 
-mod capture;
 mod ast;
 mod parse;
 mod compile;
+mod capture;
 mod peg;
 mod vm;
 
