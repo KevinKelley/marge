@@ -9,8 +9,8 @@
 
 
 #![feature(macro_rules, phase)]
-#![feature(struct_variant)]
-#![allow(dead_code, unused_variable)]
+#![feature(struct_variant, globs)]
+#![allow(dead_code, unused_imports, unused_variable)]
 
 // Unicode tables for character classes are defined in libunicode
 extern crate unicode;
@@ -19,6 +19,7 @@ pub use parse::Error;
 //pub use std::collections::HashMap;
 
 mod ast;
+mod code;
 mod parse;
 mod compile;
 mod capture;

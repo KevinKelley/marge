@@ -1,5 +1,6 @@
 
 use std::fmt;
+use ast::{Ast, Repeater, Flags};
 
 pub struct Error {
     pub pos: uint,
@@ -11,21 +12,18 @@ impl fmt::Show for Error {
                self.pos, self.msg)
     }
 }
-
-#[deriving(Show,Clone)]
-pub enum Ast {
-	Empty,				// the empty string, ε
-
-    Lit(char, Flags),
-    Dot(Flags),
-    Cls(Vec<(char, char)>, Flags),
-
-	Seq(Vec<Ast>), 			// sequence, e1 followed by e2 ...
-	Alt(Vec<Ast>),			// ordered choice, e1 / e2 ...
-	Rep(Box<Ast>, Repeater),// e*, e+, e?
-	And(Box<Ast>),			// &e
-	Not(Box<Ast>)			// !e
+pub fn err<T>(msg: &str, pos: uint) -> Result<T, Error> {
+    Err(Error {
+        pos: pos, //self.chari,
+        msg: msg.to_string(),
+    })
 }
+
+pub fn parse(src: &str) -> Result<Ast, Error> { fail!("not implemented") }
+
+
+
+// below is taken from libregex
 
 
 /// Represents the abstract syntax of a regular expression.
@@ -53,30 +51,5 @@ pub enum ReAst {
     ReRep(Box<Ast>, Repeater, /*Greed*/),
 }
 
-#[deriving(Show, PartialEq, Clone)]
-pub enum Repeater {
-    ZeroOne,
-    ZeroMore,
-    OneMore,
-}
 
-/// Flags represents all options that can be twiddled by a user in an
-/// expression.
-pub type Flags = u8;
-
-pub const FLAG_EMPTY:      u8 = 0;
-pub const FLAG_NOCASE:     u8 = 1 << 0; // i
-//pub const FLAG_MULTI:      u8 = 1 << 1; // m
-//pub const FLAG_DOTNL:      u8 = 1 << 2; // s
-//pub const FLAG_SWAP_GREED: u8 = 1 << 3; // U
-pub const FLAG_NEGATED:    u8 = 1 << 4; // char class or not word boundary
-
-fn parse(src: &str) -> Result<Ast, Error> { fail!("not implemented") }
-
-fn err<T>(msg: &str) -> Result<T, Error> {
-    Err(Error {
-        pos: 0, //self.chari,
-        msg: msg.to_string(),
-    })
-}
 
